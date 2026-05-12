@@ -68,7 +68,6 @@ export function TaskCard({ task, onToggleComplete, onDelete, isCompleted = false
               { color: colors.onSurface },
               isCompleted && styles.completedTitle,
             ]}
-            numberOfLines={1}
           >
             {task.title}
           </Text>

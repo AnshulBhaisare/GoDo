@@ -80,7 +80,7 @@ export default function TrashScreen() {
               {deletedTasks.map(task => (
                 <View key={task.id} style={[s.card, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '4D' }]}>
                   <View style={s.info}>
-                    <Text style={[s.taskTitle, { color: c.onSurface }]} numberOfLines={1}>{task.title}</Text>
+                    <Text style={[s.taskTitle, { color: c.onSurface }]}>{task.title}</Text>
                     <Text style={[s.meta, { color: c.onSurfaceVariant }]}>
                       Deleted {task.deleted_at ? new Date(task.deleted_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
                     </Text>

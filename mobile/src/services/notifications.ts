@@ -34,9 +34,10 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('task-reminders', {
       name: 'Task Reminders',
-      importance: Notifications.AndroidImportance.HIGH,
+      importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#2563eb',
+      sound: 'default',
     });
   }
 
@@ -62,7 +63,7 @@ export async function scheduleTaskNotification(
         body: task.title,
         data: { taskId: task.id },
         sound: true,
-        priority: Notifications.AndroidNotificationPriority.HIGH,
+        priority: Notifications.AndroidNotificationPriority.MAX,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,

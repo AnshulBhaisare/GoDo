@@ -112,6 +112,7 @@ async function buildTaskContext(userMessage: string): Promise<string> {
   const completedTasks = await taskDb.getCompletedTasks();
   const overdueTasks = await taskDb.getOverdueTasks();
   const todayTasks = await taskDb.getTodayTasks();
+  const deletedTasks = await taskDb.getDeletedTasks();
 
   // Build relevant task list based on message content
   let relevantTasks: string[] = [];
@@ -127,6 +128,8 @@ async function buildTaskContext(userMessage: string): Promise<string> {
     relevantTasks = overdueTasks.map(t => `⚠ ${t.title} (due: ${new Date(t.deadline!).toLocaleString()})`);
   } else if (lower.includes('today')) {
     relevantTasks = todayTasks.map(t => `${t.title} (${t.deadline ? new Date(t.deadline).toLocaleTimeString() : 'no time'})`);
+  } else if (lower.includes('deleted') || lower.includes('trash') || lower.includes('removed') || lower.includes('bin')) {
+    relevantTasks = deletedTasks.slice(0, 10).map(t => `[DELETED] ${t.title} (deleted on: ${new Date(t.deleted_at!).toLocaleString()})`);
   } else {
     // For task actions (complete, delete, etc.) include pending tasks for matching
     relevantTasks = pendingTasks.slice(0, 8).map(t => {
@@ -139,6 +142,7 @@ async function buildTaskContext(userMessage: string): Promise<string> {
     pending: pendingTasks.length,
     completed: completedTasks.length,
     overdue: overdueTasks.length,
+    deleted: deletedTasks.length,
     todayTasks: todayTasks.map(t => t.title),
     relevantTasks,
   });

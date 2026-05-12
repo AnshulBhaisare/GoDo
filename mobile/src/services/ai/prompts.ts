@@ -52,11 +52,12 @@ DEADLINE PARSING:
 IMPORTANT: Respond ONLY with valid JSON. No markdown, no code blocks, just raw JSON.`;
 }
 
-export function buildContextMessage(tasks: { pending: number; completed: number; overdue: number; todayTasks: string[]; relevantTasks: string[] }): string {
+export function buildContextMessage(tasks: { pending: number; completed: number; overdue: number; deleted: number; todayTasks: string[]; relevantTasks: string[] }): string {
   let context = `TASK CONTEXT:\n`;
   context += `- Pending tasks: ${tasks.pending}\n`;
   context += `- Completed tasks: ${tasks.completed}\n`;
   context += `- Overdue tasks: ${tasks.overdue}\n`;
+  context += `- Recently deleted tasks (in trash): ${tasks.deleted}\n`;
   
   if (tasks.todayTasks.length > 0) {
     context += `- Today's tasks: ${tasks.todayTasks.join(', ')}\n`;
