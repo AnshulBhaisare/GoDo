@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Task } from '../types';
+import { useSettingsStore } from '../stores/settingsStore';
 import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
 
 interface TaskCardProps {
@@ -12,7 +13,8 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onToggleComplete, onDelete, isCompleted = false }: TaskCardProps) {
-  const colors = Colors.light;
+  const settings = useSettingsStore();
+  const colors = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
 
   const priorityConfig: Record<string, { label: string; bg: string; text: string; border?: string }> = {
     high: {

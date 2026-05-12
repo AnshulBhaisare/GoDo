@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ChatMessage as ChatMessageType } from '../types';
+import { useSettingsStore } from '../stores/settingsStore';
 import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
 
 interface ChatBubbleProps {
@@ -10,7 +11,8 @@ interface ChatBubbleProps {
 
 export function ChatBubble({ message }: ChatBubbleProps) {
   const isUser = message.role === 'user';
-  const colors = Colors.light;
+  const settings = useSettingsStore();
+  const colors = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
 
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.aiContainer]}>

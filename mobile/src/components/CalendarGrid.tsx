@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Task } from '../types';
+import { useSettingsStore } from '../stores/settingsStore';
 import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
 
 interface CalendarGridProps {
@@ -18,7 +19,8 @@ const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 export function CalendarGrid(props: CalendarGridProps) {
   const { year, month, tasks, onPrevMonth, onNextMonth, selectedDate, onSelectDate } = props;
-  const c = Colors.light;
+  const settings = useSettingsStore();
+  const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
   const days = useMemo(() => buildDays(year, month, tasks), [year, month, tasks]);
   const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
 

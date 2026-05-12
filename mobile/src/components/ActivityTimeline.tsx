@@ -2,21 +2,23 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ActivityLog, ActivityEventType } from '../types';
+import { useSettingsStore } from '../stores/settingsStore';
 import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
 
 interface Props { logs: ActivityLog[]; }
 
-const EVENT_CONFIG: Record<ActivityEventType, { icon: string; color: string; label: string }> = {
-  created: { icon: 'add-circle', color: Colors.light.primary, label: 'Task Created' },
-  updated: { icon: 'edit', color: Colors.light.primary, label: 'Task Updated' },
-  completed: { icon: 'check-circle', color: Colors.light.primary, label: 'Task Completed' },
-  reopened: { icon: 'refresh', color: Colors.light.secondary, label: 'Task Reopened' },
-  deleted: { icon: 'delete', color: Colors.light.error, label: 'Task Deleted' },
-  restored: { icon: 'history', color: Colors.light.primary, label: 'Task Restored' },
-};
-
 export function ActivityTimeline({ logs }: Props) {
-  const c = Colors.light;
+  const settings = useSettingsStore();
+  const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
+
+  const EVENT_CONFIG: Record<ActivityEventType, { icon: string; color: string; label: string }> = {
+    created: { icon: 'add-circle', color: c.primary, label: 'Task Created' },
+    updated: { icon: 'edit', color: c.primary, label: 'Task Updated' },
+    completed: { icon: 'check-circle', color: c.primary, label: 'Task Completed' },
+    reopened: { icon: 'refresh', color: c.secondary, label: 'Task Reopened' },
+    deleted: { icon: 'delete', color: c.error, label: 'Task Deleted' },
+    restored: { icon: 'history', color: c.primary, label: 'Task Restored' },
+  };
 
   if (logs.length === 0) {
     return (
