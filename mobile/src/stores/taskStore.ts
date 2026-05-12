@@ -17,6 +17,7 @@ interface TaskState {
   reopenTask: (id: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   restoreTask: (id: string) => Promise<void>;
+  permanentlyDeleteTask: (id: string) => Promise<void>;
   updateTask: (id: string, input: UpdateTaskInput, reminderOffset?: number) => Promise<void>;
   cleanupExpiredTasks: () => Promise<void>;
 }
@@ -109,6 +110,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     if (task) {
       await logActivity(task.id, task.title, 'restored');
     }
+    await get().loadTasks();
+  },
+  
+  permanentlyDeleteTask: async (id) => {
+    await taskDb.permanentlyDeleteTask(id);
     await get().loadTasks();
   },
 

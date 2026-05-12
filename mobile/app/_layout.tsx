@@ -37,7 +37,7 @@ export default function RootLayout() {
         await getDatabase();
         await useSettingsStore.getState().loadSettings();
         await useTaskStore.getState().loadTasks();
-        await useChatStore.getState().loadMessages();
+        await useChatStore.getState().clearChat();
         await useActivityStore.getState().loadLogs();
         await useTaskStore.getState().cleanupExpiredTasks();
         await requestNotificationPermissions();

@@ -213,6 +213,14 @@ export async function getAllActiveTasks(): Promise<Task[]> {
   );
 }
 
+export async function permanentlyDeleteTask(id: string): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    `DELETE FROM tasks WHERE id = ?`,
+    [id]
+  );
+}
+
 export async function updateTaskNotificationId(taskId: string, notificationId: string | null): Promise<void> {
   const db = await getDatabase();
   await db.runAsync(

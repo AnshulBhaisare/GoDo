@@ -73,6 +73,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="trash"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <View style={{ alignItems: 'center' }}>
+              <MaterialIcons name="delete-sweep" size={24} color={color} />
+              {focused && <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: c.primary, marginTop: 4 }} />}
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           tabBarIcon: ({ color, focused }) => (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,7 @@ import { TaskCard } from '../../src/components/TaskCard';
 import { useActivityStore } from '../../src/stores/activityStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { getTasksForMonth } from '../../src/db/taskQueries';
+import { useTaskStore } from '../../src/stores/taskStore';
 import { Colors } from '../../src/constants/theme';
 import { Task } from '../../src/types';
 
@@ -15,6 +16,7 @@ export default function CalendarScreen() {
   const router = useRouter();
   const settings = useSettingsStore();
   const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
+  const { pendingTasks, loadTasks: loadAllTasks, completeTask, reopenTask, deleteTask } = useTaskStore();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -22,8 +24,18 @@ export default function CalendarScreen() {
   const [selectedDate, setSelectedDate] = useState<number | null>(now.getDate());
   const { weeklyCompletions, dailyCounts, loadStats } = useActivityStore();
 
-  useEffect(() => { loadStats(); }, []);
-  useEffect(() => { getTasksForMonth(year, month).then(setTasks); }, [year, month]);
+  useEffect(() => { loadStats(); loadAllTasks(); }, []);
+  useEffect(() => { getTasksForMonth(year, month).then(setTasks); }, [year, month, pendingTasks]);
+
+  const handleToggle = useCallback((id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (task?.status === 'pending') completeTask(id);
+    else reopenTask(id);
+  }, [tasks, completeTask, reopenTask]);
+
+  const handleDelete = useCallback((id: string) => {
+    deleteTask(id);
+  }, [deleteTask]);
 
   const prevMonth = useCallback(() => {
     if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1);
@@ -77,7 +89,13 @@ export default function CalendarScreen() {
               Tasks for {new Date(year, month, selectedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
             </Text>
             {selectedDateTasks.map(t => (
-              <TaskCard key={t.id} task={t} />
+              <TaskCard 
+                key={t.id} 
+                task={t} 
+                onToggleComplete={handleToggle} 
+                onDelete={handleDelete}
+                isCompleted={t.status === 'completed'}
+              />
             ))}
           </View>
         )}
