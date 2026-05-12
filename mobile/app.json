@@ -10,8 +10,8 @@
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#faf8ff"
+      "resizeMode": "cover",
+      "backgroundColor": "#02011a"
     },
     "ios": {
       "supportsTablet": true,
@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#faf8ff"
+        "backgroundColor": "#02011a"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.godo.app",

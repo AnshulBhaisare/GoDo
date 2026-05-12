@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Task } from '../types';
 import { useSettingsStore } from '../stores/settingsStore';
 import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
@@ -49,20 +50,13 @@ export function TaskCard({ task, onToggleComplete, onDelete, isCompleted = false
     ]}>
       {/* Checkbox */}
       <Pressable
-        onPress={() => onToggleComplete(task.id)}
-        style={styles.checkboxContainer}
-        hitSlop={10}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          onToggleComplete(task.id);
+        }}
+        style={[styles.checkbox, { borderColor: colors.primary + '33' }, isCompleted && { backgroundColor: colors.primary, borderColor: colors.primary }]}
       >
-        <View style={[
-          styles.checkbox,
-          isCompleted
-            ? { backgroundColor: colors.primary, borderColor: colors.primary }
-            : { borderColor: colors.outlineVariant },
-        ]}>
-          {isCompleted && (
-            <MaterialIcons name="check" size={14} color={colors.onPrimary} />
-          )}
-        </View>
+        {isCompleted && <MaterialIcons name="check" size={14} color={colors.onPrimary} />}
       </Pressable>
 
       {/* Content */}
@@ -117,12 +111,14 @@ export function TaskCard({ task, onToggleComplete, onDelete, isCompleted = false
 
       {/* Delete button */}
       {!isCompleted && (
-        <Pressable
-          onPress={() => onDelete(task.id)}
+        <Pressable 
+          onPress={() => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            onDelete(task.id);
+          }} 
           style={styles.deleteBtn}
-          hitSlop={10}
         >
-          <MaterialIcons name="delete-outline" size={18} color={colors.error + '80'} />
+          <MaterialIcons name="delete-outline" size={18} color={colors.error} />
         </Pressable>
       )}
     </View>

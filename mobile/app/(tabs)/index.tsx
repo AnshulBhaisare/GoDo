@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { useChatStore } from '../../src/stores/chatStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { ChatBubble } from '../../src/components/ChatBubble';
@@ -36,9 +37,10 @@ export default function ChatScreen() {
     return () => { showSub.remove(); hideSub.remove(); };
   }, []);
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const text = inputText.trim();
     if (!text || isAIResponding) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setInputText('');
     sendMessage(text);
   }, [inputText, isAIResponding, sendMessage]);

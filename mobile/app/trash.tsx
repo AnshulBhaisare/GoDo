@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, Platform } from 'react-n
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { useTaskStore } from '../src/stores/taskStore';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { Colors } from '../src/constants/theme';
@@ -16,6 +17,7 @@ export default function TrashScreen() {
   useEffect(() => { loadTasks(); }, []);
 
   const handleRestore = useCallback((id: string) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     restoreTask(id);
   }, [restoreTask]);
 

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet, Platform } from 'react-native';
+import { View, Text, FlatList, Pressable, TextInput, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -15,8 +15,12 @@ export default function TasksScreen() {
   const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
   const { pendingTasks, completedTasks, completeTask, reopenTask, deleteTask } = useTaskStore();
   const [tab, setTab] = useState<'pending' | 'completed'>('pending');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const tasks = tab === 'pending' ? pendingTasks : completedTasks;
+  const tasks = (tab === 'pending' ? pendingTasks : completedTasks).filter(t => 
+    t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleToggle = useCallback((id: string) => {
     if (tab === 'pending') completeTask(id);
@@ -63,6 +67,23 @@ export default function TasksScreen() {
         <Text style={[s.pageTitle, { color: c.onSurface }]}>Tasks</Text>
         <Text style={[s.pageSubtitle, { color: c.onSurfaceVariant }]}>Manage your priorities</Text>
 
+        {/* Search Bar */}
+        <View style={[s.searchBar, { backgroundColor: c.surfaceContainer, borderColor: c.outlineVariant + '4D' }]}>
+          <MaterialIcons name="search" size={20} color={c.onSurfaceVariant} />
+          <TextInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search tasks..."
+            placeholderTextColor={c.outlineVariant}
+            style={[s.searchInput, { color: c.onSurface }]}
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery('')}>
+              <MaterialIcons name="close" size={20} color={c.onSurfaceVariant} />
+            </Pressable>
+          )}
+        </View>
+
         {/* Tabs */}
         <View style={[s.tabs, { borderBottomColor: c.outlineVariant + '4D' }]}>
           <Pressable onPress={() => setTab('pending')} style={s.tab}>
@@ -101,6 +122,8 @@ const s = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: 20 },
   pageTitle: { fontSize: 32, fontWeight: '700', letterSpacing: -0.64 },
   pageSubtitle: { fontSize: 16, marginTop: 4, marginBottom: 16 },
+  searchBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, borderWidth: 1, gap: 8, marginBottom: 16 },
+  searchInput: { flex: 1, fontSize: 16, paddingVertical: 4 },
   tabs: { flexDirection: 'row', gap: 16, borderBottomWidth: 1, marginBottom: 16 },
   tab: { paddingBottom: 12, position: 'relative' },
   tabText: { fontSize: 18, fontWeight: '600' },
