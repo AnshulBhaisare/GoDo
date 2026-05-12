@@ -117,26 +117,39 @@ async function buildTaskContext(userMessage: string): Promise<string> {
   // Build relevant task list based on message content
   let relevantTasks: string[] = [];
 
-  if (lower.includes('pending') || lower.includes('what') || lower.includes('list') || lower.includes('show')) {
-    relevantTasks = pendingTasks.slice(0, 10).map(t => {
+  // 1. Add pending tasks if requested or by default
+  if (lower.includes('pending') || lower.includes('what') || lower.includes('list') || lower.includes('show') || lower.includes('active')) {
+    relevantTasks.push(...pendingTasks.slice(0, 10).map(t => {
       const deadline = t.deadline ? ` (due: ${new Date(t.deadline).toLocaleString()})` : '';
-      return `[${t.priority}] ${t.title}${deadline}`;
-    });
-  } else if (lower.includes('complet') || lower.includes('done') || lower.includes('finished')) {
-    relevantTasks = completedTasks.slice(0, 10).map(t => `✓ ${t.title}`);
-  } else if (lower.includes('overdue') || lower.includes('late') || lower.includes('missed')) {
-    relevantTasks = overdueTasks.map(t => `⚠ ${t.title} (due: ${new Date(t.deadline!).toLocaleString()})`);
-  } else if (lower.includes('today')) {
-    relevantTasks = todayTasks.map(t => `${t.title} (${t.deadline ? new Date(t.deadline).toLocaleTimeString() : 'no time'})`);
-  } else if (lower.includes('deleted') || lower.includes('trash') || lower.includes('removed') || lower.includes('bin')) {
-    relevantTasks = deletedTasks.slice(0, 10).map(t => `[DELETED] ${t.title} (deleted on: ${new Date(t.deleted_at!).toLocaleString()})`);
-  } else {
-    // For task actions (complete, delete, etc.) include pending tasks for matching
-    relevantTasks = pendingTasks.slice(0, 8).map(t => {
-      const deadline = t.deadline ? ` (due: ${new Date(t.deadline).toLocaleString()})` : '';
-      return `[${t.status}][${t.priority}] ${t.title}${deadline}`;
-    });
+      return `[PENDING][${t.priority}] ${t.title}${deadline}`;
+    }));
   }
+
+  // 2. Add completed tasks
+  if (lower.includes('complet') || lower.includes('done') || lower.includes('finished')) {
+    relevantTasks.push(...completedTasks.slice(0, 10).map(t => `[COMPLETED] ${t.title}`));
+  }
+
+  // 3. Add overdue tasks
+  if (lower.includes('overdue') || lower.includes('late') || lower.includes('missed')) {
+    relevantTasks.push(...overdueTasks.map(t => `[OVERDUE] ${t.title} (due: ${new Date(t.deadline!).toLocaleString()})`));
+  }
+
+  // 4. Add today's tasks
+  if (lower.includes('today')) {
+    relevantTasks.push(...todayTasks.map(t => `[TODAY] ${t.title} (${t.deadline ? new Date(t.deadline).toLocaleTimeString() : 'no time'})`));
+  }
+
+  // 5. Add deleted tasks
+  if (lower.includes('deleted') || lower.includes('trash') || lower.includes('removed') || lower.includes('bin') || lower.includes('history')) {
+    relevantTasks.push(...deletedTasks.slice(0, 10).map(t => `[DELETED] ${t.title} (deleted at: ${new Date(t.deleted_at!).toLocaleString()})`));
+  }
+
+  // Fallback: If no specific category was matched, add a few pending tasks for general context
+  if (relevantTasks.length === 0) {
+    relevantTasks.push(...pendingTasks.slice(0, 5).map(t => `[PENDING] ${t.title}`));
+  }
+
 
   return buildContextMessage({
     pending: pendingTasks.length,
