@@ -41,7 +41,6 @@ Return ONLY the JSON. No explanation, no markdown, no extra text.
             temperature=0
         )
         raw = response.choices[0].message.content.strip()
-        print(f"Groq raw response: {raw}")
 
         if raw.startswith("```"):
             raw = raw.split("```")[1]
@@ -53,6 +52,4 @@ Return ONLY the JSON. No explanation, no markdown, no extra text.
         return data
 
     except Exception as e:
-        print(f"Parser error: {e}")
-        print(f"Raw response was: {raw}")
         return None

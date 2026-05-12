@@ -46,7 +46,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const task = await taskDb.createTask(input);
     await logActivity(task.id, task.title, 'created');
 
-    // Schedule notification if deadline exists
     if (task.deadline) {
       const notifId = await scheduleTaskNotification(task, reminderOffset);
       if (notifId) {
@@ -55,7 +54,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       }
     }
 
-    // Handle recurring task creation
     await get().loadTasks();
     return task;
   },
@@ -65,12 +63,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     if (task) {
       await logActivity(task.id, task.title, 'completed');
 
-      // Cancel notification
       if (task.notification_id) {
         await cancelTaskNotification(task.notification_id);
       }
 
-      // If recurring, create next occurrence
       if (task.recurring_type !== 'none' && task.deadline) {
         const nextDeadline = calculateNextDeadline(task.deadline, task.recurring_type);
         await taskDb.createTask({
@@ -123,7 +119,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     if (task) {
       await logActivity(task.id, task.title, 'updated');
 
-      // Reschedule notification if deadline changed
       if (input.deadline !== undefined) {
         if (task.notification_id) {
           await cancelTaskNotification(task.notification_id);

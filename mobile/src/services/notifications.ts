@@ -2,7 +2,6 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { Task } from '../types';
 
-// Configure notification handler
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -27,8 +26,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
       return false;
     }
   } catch (error) {
-    console.warn('Push notifications are not fully supported in Expo Go. Skipping permission request.', error);
-    // Continue execution to create the channel anyway!
+    console.warn('Push notifications skipping permission request.', error);
   }
 
   if (Platform.OS === 'android') {
@@ -53,7 +51,6 @@ export async function scheduleTaskNotification(
   const deadlineDate = new Date(task.deadline);
   const notifyDate = new Date(deadlineDate.getTime() - offsetMinutes * 60 * 1000);
 
-  // Don't schedule if notification time is in the past
   if (notifyDate.getTime() <= Date.now()) return null;
 
   try {
