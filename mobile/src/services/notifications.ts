@@ -28,7 +28,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
     }
   } catch (error) {
     console.warn('Push notifications are not fully supported in Expo Go. Skipping permission request.', error);
-    return false;
+    // Continue execution to create the channel anyway!
   }
 
   if (Platform.OS === 'android') {
@@ -62,6 +62,7 @@ export async function scheduleTaskNotification(
         body: task.title,
         data: { taskId: task.id },
         sound: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,

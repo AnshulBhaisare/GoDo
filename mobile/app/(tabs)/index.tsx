@@ -5,7 +5,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useChatStore } from '../../src/stores/chatStore';
+import { useSettingsStore } from '../../src/stores/settingsStore';
 import { ChatBubble } from '../../src/components/ChatBubble';
 import { Colors, Spacing, BorderRadius, Typography } from '../../src/constants/theme';
 import { ChatMessage } from '../../src/types';
@@ -13,7 +15,9 @@ import { ChatMessage } from '../../src/types';
 const SUGGESTIONS = ["Today's tasks", 'Pending tasks', 'Add reminder'];
 
 export default function ChatScreen() {
-  const c = Colors.light;
+  const router = useRouter();
+  const settings = useSettingsStore();
+  const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
   const { messages, isAIResponding, sendMessage } = useChatStore();
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef<FlatList>(null);
@@ -64,12 +68,15 @@ export default function ChatScreen() {
     <SafeAreaView style={[s.safe, { backgroundColor: c.background }]} edges={['top']}>
       {/* Header */}
       <View style={[s.header, { backgroundColor: c.background + 'CC' }]}>
-        <View style={[s.profilePic, { backgroundColor: c.surfaceContainer, borderColor: c.surfaceVariant }]}>
-          <MaterialIcons name="person" size={20} color={c.onSurfaceVariant} />
-        </View>
+        <Pressable 
+          onPress={() => settings.setTheme(settings.theme === 'dark' ? 'light' : 'dark')}
+          style={[s.profilePic, { backgroundColor: c.surfaceContainer, borderColor: c.surfaceVariant }]}
+        >
+          <MaterialIcons name={settings.theme === 'dark' ? 'light-mode' : 'dark-mode'} size={18} color={c.onSurfaceVariant} />
+        </Pressable>
         <Text style={[s.headerTitle, { color: c.primary }]}>GoDo</Text>
-        <Pressable style={s.headerBtn}>
-          <MaterialIcons name="notifications-none" size={24} color={c.primary} />
+        <Pressable style={s.headerBtn} onPress={() => router.push('/notifications')}>
+          <MaterialIcons name="notifications-none" size={24} color={c.onSurfaceVariant} />
         </Pressable>
       </View>
 

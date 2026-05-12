@@ -10,15 +10,17 @@ export async function callOpenRouterAPI(
   apiKey: string,
   userMessage: string,
   taskContext: string,
+  userName: string,
   recentMessages: ChatMessage[] = [],
   model: string = 'meta-llama/llama-3.3-70b-instruct:free'
 ): Promise<string> {
-  const now = new Date().toLocaleString();
+  const dt = new Date();
+  const now = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
 
   const messages: OpenRouterMessage[] = [
     {
       role: 'system',
-      content: getSystemPrompt(now),
+      content: getSystemPrompt(now, userName),
     },
   ];
 

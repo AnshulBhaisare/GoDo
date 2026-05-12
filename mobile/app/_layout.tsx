@@ -3,8 +3,11 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, LogBox } from 'react-native';
 import 'react-native-reanimated';
+
+// Suppress the unavoidable Expo Go notifications warning
+LogBox.ignoreLogs(['expo-notifications: Android Push notifications']);
 import { getDatabase } from '../src/db/database';
 import { useTaskStore } from '../src/stores/taskStore';
 import { useChatStore } from '../src/stores/chatStore';

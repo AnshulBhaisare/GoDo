@@ -7,9 +7,29 @@ __pycache__/
 *$py.class
 venv/
 
+# Expo
+.expo/
+dist/
+web-build/
+dev-client-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
 # Node
 node_modules/
 .npm/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment Variables
+.env
+.env.local
 
 # OS Files
 .DS_Store

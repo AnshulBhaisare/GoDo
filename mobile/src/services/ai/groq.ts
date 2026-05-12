@@ -10,14 +10,16 @@ export async function callGroqAPI(
   apiKey: string,
   userMessage: string,
   taskContext: string,
+  userName: string,
   recentMessages: ChatMessage[] = []
 ): Promise<string> {
-  const now = new Date().toLocaleString();
+  const dt = new Date();
+  const now = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
   
   const messages: GroqRequestMessage[] = [
     {
       role: 'system',
-      content: getSystemPrompt(now),
+      content: getSystemPrompt(now, userName),
     },
   ];
 

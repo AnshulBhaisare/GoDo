@@ -2,13 +2,17 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useTaskStore } from '../../src/stores/taskStore';
+import { useSettingsStore } from '../../src/stores/settingsStore';
 import { TaskCard } from '../../src/components/TaskCard';
-import { Colors, Spacing, Typography } from '../../src/constants/theme';
+import { Colors } from '../../src/constants/theme';
 import { Task } from '../../src/types';
 
 export default function TasksScreen() {
-  const c = Colors.light;
+  const router = useRouter();
+  const settings = useSettingsStore();
+  const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
   const { pendingTasks, completedTasks, completeTask, reopenTask, deleteTask } = useTaskStore();
   const [tab, setTab] = useState<'pending' | 'completed'>('pending');
 
@@ -43,11 +47,16 @@ export default function TasksScreen() {
     <SafeAreaView style={[s.safe, { backgroundColor: c.background }]} edges={['top']}>
       {/* Header */}
       <View style={[s.header, { backgroundColor: c.background + 'CC' }]}>
-        <View style={[s.profilePic, { backgroundColor: c.surfaceVariant }]}>
-          <MaterialIcons name="person" size={18} color={c.onSurfaceVariant} />
-        </View>
+        <Pressable 
+          onPress={() => settings.setTheme(settings.theme === 'dark' ? 'light' : 'dark')}
+          style={[s.profilePic, { backgroundColor: c.surfaceVariant }]}
+        >
+          <MaterialIcons name={settings.theme === 'dark' ? 'light-mode' : 'dark-mode'} size={18} color={c.onSurfaceVariant} />
+        </Pressable>
         <Text style={[s.headerTitle, { color: c.primary }]}>GoDo</Text>
-        <Pressable><MaterialIcons name="notifications-none" size={24} color={c.primary} /></Pressable>
+        <Pressable onPress={() => router.push('/notifications')}>
+          <MaterialIcons name="notifications-none" size={24} color={c.onSurfaceVariant} />
+        </Pressable>
       </View>
 
       <View style={s.content}>

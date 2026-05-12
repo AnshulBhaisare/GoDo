@@ -96,3 +96,12 @@ export async function closeDatabase(): Promise<void> {
     db = null;
   }
 }
+
+export async function wipeAllData(): Promise<void> {
+  const database = await getDatabase();
+  await database.execAsync(`
+    DELETE FROM tasks;
+    DELETE FROM chat_history;
+    DELETE FROM task_logs;
+  `);
+}

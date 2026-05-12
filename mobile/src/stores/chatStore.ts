@@ -69,9 +69,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       // Call AI provider
       let rawResponse: string;
       if (provider === 'groq') {
-        rawResponse = await callGroqAPI(apiKey, trimmed, taskContext, recentMessages);
+        rawResponse = await callGroqAPI(apiKey, trimmed, taskContext, settings.userName, recentMessages);
       } else {
-        rawResponse = await callOpenRouterAPI(apiKey, trimmed, taskContext, recentMessages);
+        rawResponse = await callOpenRouterAPI(apiKey, trimmed, taskContext, settings.userName, recentMessages);
       }
 
       // Parse the AI response

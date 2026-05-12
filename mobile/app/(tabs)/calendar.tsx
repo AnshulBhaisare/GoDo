@@ -2,14 +2,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { CalendarGrid } from '../../src/components/CalendarGrid';
+import { TaskCard } from '../../src/components/TaskCard';
 import { useActivityStore } from '../../src/stores/activityStore';
+import { useSettingsStore } from '../../src/stores/settingsStore';
 import { getTasksForMonth } from '../../src/db/taskQueries';
 import { Colors } from '../../src/constants/theme';
 import { Task } from '../../src/types';
 
 export default function CalendarScreen() {
-  const c = Colors.light;
+  const router = useRouter();
+  const settings = useSettingsStore();
+  const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -37,16 +42,25 @@ export default function CalendarScreen() {
   // Completion rate
   const totalTasks = tasks.length || 1;
   const completedCount = tasks.filter(t => t.status === 'completed').length;
-  const rate = Math.round((completedCount / totalTasks) * 100);
+  const rate = totalTasks > 0 && tasks.length > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
+
+  const selectedDateTasks = selectedDate
+    ? tasks.filter(t => t.deadline && new Date(t.deadline).getDate() === selectedDate)
+    : [];
 
   return (
     <SafeAreaView style={[s.safe, { backgroundColor: c.background }]} edges={['top']}>
       <View style={[s.header, { backgroundColor: c.background + 'CC' }]}>
-        <View style={[s.profilePic, { backgroundColor: c.surfaceVariant }]}>
-          <MaterialIcons name="person" size={18} color={c.onSurfaceVariant} />
-        </View>
+        <Pressable 
+          onPress={() => settings.setTheme(settings.theme === 'dark' ? 'light' : 'dark')}
+          style={[s.profilePic, { backgroundColor: c.surfaceVariant }]}
+        >
+          <MaterialIcons name={settings.theme === 'dark' ? 'light-mode' : 'dark-mode'} size={18} color={c.onSurfaceVariant} />
+        </Pressable>
         <Text style={[s.headerTitle, { color: c.primary }]}>GoDo</Text>
-        <MaterialIcons name="notifications-none" size={24} color={c.onSurfaceVariant} />
+        <Pressable onPress={() => router.push('/notifications')}>
+          <MaterialIcons name="notifications-none" size={24} color={c.onSurfaceVariant} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
@@ -55,6 +69,23 @@ export default function CalendarScreen() {
           onPrevMonth={prevMonth} onNextMonth={nextMonth}
           selectedDate={selectedDate} onSelectDate={setSelectedDate}
         />
+
+        {/* Selected Date Tasks */}
+        {selectedDate !== null && selectedDateTasks.length > 0 && (
+          <View style={{ gap: 8 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', color: c.onSurface, marginLeft: 4, marginBottom: 4 }}>
+              Tasks for {new Date(year, month, selectedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            </Text>
+            {selectedDateTasks.map(t => (
+              <TaskCard key={t.id} task={t} />
+            ))}
+          </View>
+        )}
+        {selectedDate !== null && selectedDateTasks.length === 0 && (
+          <Text style={{ fontSize: 14, color: c.outline, textAlign: 'center', marginVertical: 8 }}>
+            No tasks due on this day.
+          </Text>
+        )}
 
         {/* Stats section */}
         <View style={s.statsRow}>

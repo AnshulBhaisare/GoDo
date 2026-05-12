@@ -2,20 +2,25 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TextInput, Pressable, StyleSheet, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { exportBackup, importBackup } from '../../src/services/backup';
 import { useTaskStore } from '../../src/stores/taskStore';
 import { useChatStore } from '../../src/stores/chatStore';
 import { useActivityStore } from '../../src/stores/activityStore';
+import { wipeAllData } from '../../src/db/database';
 import { Colors } from '../../src/constants/theme';
 import { AIProvider } from '../../src/types';
 
 export default function SettingsScreen() {
-  const c = Colors.light;
+  const router = useRouter();
   const settings = useSettingsStore();
+  const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
   const [apiKey, setApiKey] = useState('');
   const [hasKey, setHasKey] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showWipeConfirm, setShowWipeConfirm] = useState(false);
+  const [wipeInput, setWipeInput] = useState('');
 
   useEffect(() => {
     settings.getAPIKey(settings.aiProvider).then(key => {
@@ -73,19 +78,51 @@ export default function SettingsScreen() {
     });
   }, [settings]);
 
+  const handleWipeData = useCallback(async () => {
+    if (wipeInput.trim() !== 'DELETE') return;
+    await wipeAllData();
+    await useTaskStore.getState().loadTasks();
+    await useChatStore.getState().clearChat();
+    await useActivityStore.getState().loadLogs();
+    setShowWipeConfirm(false);
+    setWipeInput('');
+    Alert.alert('Wiped', 'All your tasks, chat history, and logs have been permanently deleted.');
+  }, [wipeInput]);
+
   return (
     <SafeAreaView style={[s.safe, { backgroundColor: c.background }]} edges={['top']}>
       <View style={[s.header, { backgroundColor: c.background + 'CC' }]}>
-        <View style={[s.profilePic, { backgroundColor: c.surfaceVariant }]}>
-          <MaterialIcons name="person" size={18} color={c.onSurfaceVariant} />
-        </View>
+        <Pressable 
+          onPress={() => settings.setTheme(settings.theme === 'dark' ? 'light' : 'dark')}
+          style={[s.profilePic, { backgroundColor: c.surfaceVariant }]}
+        >
+          <MaterialIcons name={settings.theme === 'dark' ? 'light-mode' : 'dark-mode'} size={18} color={c.onSurfaceVariant} />
+        </Pressable>
         <Text style={[s.headerTitle, { color: c.primary }]}>GoDo</Text>
-        <MaterialIcons name="notifications-none" size={24} color={c.onSurfaceVariant} />
+        <Pressable onPress={() => router.push('/notifications')}>
+          <MaterialIcons name="notifications-none" size={24} color={c.onSurfaceVariant} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         <Text style={[s.pageTitle, { color: c.onSurface }]}>Settings</Text>
         <Text style={[s.pageSub, { color: c.onSurfaceVariant }]}>Manage your preferences and integrations.</Text>
+
+        {/* User Profile */}
+        <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
+          <View style={s.sectionHeader}>
+            <MaterialIcons name="person-outline" size={20} color={c.primary} />
+            <Text style={[s.sectionTitle, { color: c.onSurface }]}>Profile</Text>
+          </View>
+          <Text style={[s.inputLabel, { color: c.onSurfaceVariant }]}>Your Name</Text>
+          <TextInput
+            value={settings.userName}
+            onChangeText={(name) => settings.setUserName(name)}
+            placeholder="What should the AI call you?"
+            placeholderTextColor={c.outlineVariant + '80'}
+            style={[s.apiInput, { color: c.onSurface, borderBottomColor: c.outlineVariant }]}
+          />
+        </View>
 
         {/* AI Provider */}
         <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
@@ -181,6 +218,49 @@ export default function SettingsScreen() {
             </View>
             <MaterialIcons name="chevron-right" size={16} color={c.outlineVariant} />
           </Pressable>
+        </View>
+
+        {/* Danger Zone */}
+        <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.error + '4D' }]}>
+          <View style={s.sectionHeader}>
+            <MaterialIcons name="warning" size={20} color={c.error} />
+            <Text style={[s.sectionTitle, { color: c.error }]}>Danger Zone</Text>
+          </View>
+          
+          {!showWipeConfirm ? (
+            <Pressable onPress={() => setShowWipeConfirm(true)} style={[s.dataRow, { paddingVertical: 4 }]}>
+              <View style={s.dataRowLeft}>
+                <MaterialIcons name="delete-forever" size={20} color={c.error} />
+                <Text style={[s.dataRowText, { color: c.error, fontWeight: '600' }]}>Wipe All App Data</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={16} color={c.error} />
+            </Pressable>
+          ) : (
+            <View style={{ marginTop: 8 }}>
+              <Text style={{ fontSize: 14, color: c.onSurfaceVariant, marginBottom: 8 }}>
+                This will permanently delete all tasks, chat history, and logs. Type <Text style={{ fontWeight: '700', color: c.error }}>DELETE</Text> to confirm.
+              </Text>
+              <TextInput
+                value={wipeInput}
+                onChangeText={setWipeInput}
+                placeholder="DELETE"
+                autoCapitalize="characters"
+                style={[s.apiInput, { color: c.onSurface, borderBottomColor: wipeInput === 'DELETE' ? c.error : c.outlineVariant, marginBottom: 12 }]}
+              />
+              <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
+                <Pressable onPress={() => { setShowWipeConfirm(false); setWipeInput(''); }} style={[s.clearBtn, { borderColor: c.outlineVariant }]}>
+                  <Text style={[s.clearBtnText, { color: c.onSurface }]}>Cancel</Text>
+                </Pressable>
+                <Pressable 
+                  onPress={handleWipeData} 
+                  disabled={wipeInput !== 'DELETE'} 
+                  style={[s.saveBtn, { backgroundColor: wipeInput === 'DELETE' ? c.error : c.surfaceVariant }]}
+                >
+                  <Text style={[s.saveBtnText, { color: wipeInput === 'DELETE' ? c.onError : c.onSurfaceVariant }]}>Wipe Everything</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
         </View>
 
         {/* About */}

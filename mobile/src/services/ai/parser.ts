@@ -18,6 +18,26 @@ export function parseAIResponse(rawResponse: string): AIResponse {
 
     let taskAction: TaskActionResult | null = null;
 
+function normalizeDeadline(deadline: string | null): string | null {
+  if (!deadline) return null;
+  try {
+    if (!deadline.endsWith('Z') && !deadline.includes('+') && deadline.includes('T')) {
+      const [datePart, timePart] = deadline.split('T');
+      if (datePart && timePart) {
+        const [y, m, d] = datePart.split('-').map(Number);
+        const [h, min, s] = timePart.split(':').map(Number);
+        const dt = new Date(y, m - 1, d, h, min || 0, s || 0);
+        if (!isNaN(dt.getTime())) return dt.toISOString();
+      }
+    }
+    const dt = new Date(deadline);
+    if (!isNaN(dt.getTime())) return dt.toISOString();
+    return deadline;
+  } catch {
+    return deadline;
+  }
+}
+
     if (action !== 'none') {
       taskAction = {
         action,
@@ -30,7 +50,7 @@ export function parseAIResponse(rawResponse: string): AIResponse {
           title: parsed.task.title || 'Untitled Task',
           description: parsed.task.description || '',
           priority: parsed.task.priority || 'medium',
-          deadline: parsed.task.deadline || null,
+          deadline: normalizeDeadline(parsed.task.deadline),
           recurring_type: parsed.task.recurring_type || 'none',
         };
       }
@@ -40,7 +60,7 @@ export function parseAIResponse(rawResponse: string): AIResponse {
           title: parsed.task.title,
           description: parsed.task.description,
           priority: parsed.task.priority,
-          deadline: parsed.task.deadline,
+          deadline: normalizeDeadline(parsed.task.deadline),
           recurring_type: parsed.task.recurring_type,
         };
       }

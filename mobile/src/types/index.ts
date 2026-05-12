@@ -89,6 +89,7 @@ export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
   reminderOffsetMinutes: number;
   aiProvider: AIProvider;
+  userName: string;
 }
 
 // ─── Calendar Types ──────────────────────────────────────────
