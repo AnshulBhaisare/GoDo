@@ -16,11 +16,16 @@ export default function SettingsScreen() {
   const router = useRouter();
   const settings = useSettingsStore();
   const c = Colors[settings.theme === 'dark' ? 'dark' : 'light'];
+  const [localName, setLocalName] = useState(settings.userName);
   const [apiKey, setApiKey] = useState('');
   const [hasKey, setHasKey] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showWipeConfirm, setShowWipeConfirm] = useState(false);
   const [wipeInput, setWipeInput] = useState('');
+
+  useEffect(() => {
+    setLocalName(settings.userName);
+  }, [settings.userName]);
 
   useEffect(() => {
     settings.getAPIKey(settings.aiProvider).then(key => {
@@ -29,8 +34,13 @@ export default function SettingsScreen() {
     });
   }, [settings.aiProvider]);
 
+  const handleSaveName = useCallback((name: string) => {
+    setLocalName(name);
+    settings.setUserName(name);
+  }, [settings]);
+
   const handleSaveKey = useCallback(async () => {
-    if (apiKey.includes('•')) return; // placeholder
+    if (apiKey.includes('•')) return;
     if (!apiKey.trim()) return;
     setIsSaving(true);
     await settings.saveAPIKey(settings.aiProvider, apiKey.trim());
@@ -104,180 +114,185 @@ export default function SettingsScreen() {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={[s.pageTitle, { color: c.onSurface }]}>Settings</Text>
-        <Text style={[s.pageSub, { color: c.onSurfaceVariant }]}>Manage your preferences and integrations.</Text>
+      <View style={s.flex}>
+        <ScrollView 
+          contentContainerStyle={s.scroll} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={[s.pageTitle, { color: c.onSurface }]}>Settings</Text>
+          <Text style={[s.pageSub, { color: c.onSurfaceVariant }]}>Manage your preferences and integrations.</Text>
 
-        {/* User Profile */}
-        <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
-          <View style={s.sectionHeader}>
-            <MaterialIcons name="person-outline" size={20} color={c.primary} />
-            <Text style={[s.sectionTitle, { color: c.onSurface }]}>Profile</Text>
-          </View>
-          <Text style={[s.inputLabel, { color: c.onSurfaceVariant }]}>Your Name</Text>
-          <TextInput
-            value={settings.userName}
-            onChangeText={(name) => settings.setUserName(name)}
-            placeholder="What should the AI call you?"
-            placeholderTextColor={c.outlineVariant + '80'}
-            style={[s.apiInput, { color: c.onSurface, borderBottomColor: c.outlineVariant }]}
-          />
-        </View>
-
-        {/* AI Provider */}
-        <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
-          <View style={s.sectionHeader}>
-            <MaterialIcons name="psychology" size={20} color={c.primary} />
-            <Text style={[s.sectionTitle, { color: c.onSurface }]}>Connect AI Provider</Text>
-          </View>
-          <Text style={[s.sectionDesc, { color: c.onSurfaceVariant }]}>
-            Link your preferred AI service for smart task parsing.
-          </Text>
-
-          {/* Provider selector */}
-          <View style={[s.providerRow, { backgroundColor: c.surfaceContainer, borderColor: c.outlineVariant + '4D' }]}>
-            <Pressable
-              onPress={() => handleProviderChange('groq')}
-              style={[s.providerBtn, settings.aiProvider === 'groq' && { backgroundColor: c.surfaceContainerLowest, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }]}
-            >
-              <Text style={[s.providerText, { color: settings.aiProvider === 'groq' ? c.primary : c.onSurfaceVariant }]}>Groq</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => handleProviderChange('openrouter')}
-              style={[s.providerBtn, settings.aiProvider === 'openrouter' && { backgroundColor: c.surfaceContainerLowest, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }]}
-            >
-              <Text style={[s.providerText, { color: settings.aiProvider === 'openrouter' ? c.primary : c.onSurfaceVariant }]}>OpenRouter</Text>
-            </Pressable>
+          {/* User Profile */}
+          <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
+            <View style={s.sectionHeader}>
+              <MaterialIcons name="person-outline" size={20} color={c.primary} />
+              <Text style={[s.sectionTitle, { color: c.onSurface }]}>Profile</Text>
+            </View>
+            <Text style={[s.inputLabel, { color: c.onSurfaceVariant }]}>Your Name</Text>
+            <TextInput
+              value={localName}
+              onChangeText={handleSaveName}
+              placeholder="What should the AI call you?"
+              placeholderTextColor={c.outlineVariant + '80'}
+              style={[s.apiInput, { color: c.onSurface, borderBottomColor: c.outlineVariant }]}
+            />
           </View>
 
-          {/* API Key input */}
-          <Text style={[s.inputLabel, { color: c.onSurfaceVariant }]}>API Key</Text>
-          <TextInput
-            value={apiKey}
-            onChangeText={setApiKey}
-            placeholder="sk-..."
-            placeholderTextColor={c.outlineVariant + '80'}
-            secureTextEntry
-            style={[s.apiInput, { color: c.onSurface, borderBottomColor: c.outlineVariant }]}
-            onFocus={() => { if (apiKey.includes('•')) setApiKey(''); }}
-          />
-          <View style={s.keyActions}>
-            {hasKey && (
-              <Pressable onPress={handleClearKey} style={[s.clearBtn, { borderColor: c.error + '4D' }]}>
-                <Text style={[s.clearBtnText, { color: c.error }]}>Clear Key</Text>
+          {/* AI Provider */}
+          <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
+            <View style={s.sectionHeader}>
+              <MaterialIcons name="psychology" size={20} color={c.primary} />
+              <Text style={[s.sectionTitle, { color: c.onSurface }]}>Connect AI Provider</Text>
+            </View>
+            <Text style={[s.sectionDesc, { color: c.onSurfaceVariant }]}>
+              Link your preferred AI service for smart task parsing.
+            </Text>
+
+            <View style={[s.providerRow, { backgroundColor: c.surfaceContainer, borderColor: c.outlineVariant + '4D' }]}>
+              <Pressable
+                onPress={() => handleProviderChange('groq')}
+                style={[s.providerBtn, settings.aiProvider === 'groq' && { backgroundColor: c.surfaceContainerLowest, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }]}
+              >
+                <Text style={[s.providerText, { color: settings.aiProvider === 'groq' ? c.primary : c.onSurfaceVariant }]}>Groq</Text>
               </Pressable>
-            )}
-            <Pressable onPress={handleSaveKey} disabled={isSaving} style={[s.saveBtn, { backgroundColor: c.primary }]}>
-              <Text style={[s.saveBtnText, { color: c.onPrimary }]}>{isSaving ? 'Saving...' : 'Save Key'}</Text>
-            </Pressable>
-          </View>
-        </View>
+              <Pressable
+                onPress={() => handleProviderChange('openrouter')}
+                style={[s.providerBtn, settings.aiProvider === 'openrouter' && { backgroundColor: c.surfaceContainerLowest, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }]}
+              >
+                <Text style={[s.providerText, { color: settings.aiProvider === 'openrouter' ? c.primary : c.onSurfaceVariant }]}>OpenRouter</Text>
+              </Pressable>
+            </View>
 
-        {/* Reminders */}
-        <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
-          <View style={s.sectionHeader}>
-            <MaterialIcons name="notifications-active" size={20} color={c.primary} />
-            <Text style={[s.sectionTitle, { color: c.onSurface }]}>Reminders</Text>
-          </View>
-          <View style={s.reminderRow}>
-            <View>
-              <Text style={[s.reminderLabel, { color: c.onSurface }]}>Default Alert Time</Text>
-              <Text style={[s.reminderSub, { color: c.onSurfaceVariant }]}>Minutes before task</Text>
+            <Text style={[s.inputLabel, { color: c.onSurfaceVariant }]}>API Key</Text>
+            <TextInput
+              value={apiKey}
+              onChangeText={setApiKey}
+              placeholder="sk-..."
+              placeholderTextColor={c.outlineVariant + '80'}
+              secureTextEntry
+              style={[s.apiInput, { color: c.onSurface, borderBottomColor: c.outlineVariant }]}
+              onFocus={() => { if (apiKey.includes('•')) setApiKey(''); }}
+            />
+            <View style={s.keyActions}>
+              {hasKey && (
+                <Pressable onPress={handleClearKey} style={[s.clearBtn, { borderColor: c.error + '4D' }]}>
+                  <Text style={[s.clearBtnText, { color: c.error }]}>Clear Key</Text>
+                </Pressable>
+              )}
+              <Pressable onPress={handleSaveKey} disabled={isSaving} style={[s.saveBtn, { backgroundColor: c.primary }]}>
+                <Text style={[s.saveBtnText, { color: c.onPrimary }]}>{isSaving ? 'Saving...' : 'Save Key'}</Text>
+              </Pressable>
             </View>
-            <View style={[s.reminderInput, { backgroundColor: c.surfaceContainer, borderColor: c.outlineVariant + '4D' }]}>
-              <TextInput
-                value={settings.reminderOffsetMinutes.toString()}
-                onChangeText={(v) => { const n = parseInt(v, 10); if (!isNaN(n) && n >= 0 && n <= 120) settings.setReminderOffset(n); }}
-                keyboardType="numeric"
-                style={[s.reminderValue, { color: c.onSurface }]}
-                maxLength={3}
-              />
-              <Text style={[s.reminderUnit, { color: c.onSurfaceVariant }]}>min</Text>
-            </View>
           </View>
-        </View>
 
-        {/* Data Management */}
-        <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
-          <View style={s.sectionHeader}>
-            <MaterialIcons name="storage" size={20} color={c.primary} />
-            <Text style={[s.sectionTitle, { color: c.onSurface }]}>Data Management</Text>
+          {/* Reminders */}
+          <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
+            <View style={s.sectionHeader}>
+              <MaterialIcons name="notifications-active" size={20} color={c.primary} />
+              <Text style={[s.sectionTitle, { color: c.onSurface }]}>Reminders</Text>
+            </View>
+            <View style={s.reminderRow}>
+              <View>
+                <Text style={[s.reminderLabel, { color: c.onSurface }]}>Default Alert Time</Text>
+                <Text style={[s.reminderSub, { color: c.onSurfaceVariant }]}>Minutes before task</Text>
+              </View>
+              <View style={[s.reminderInput, { backgroundColor: c.surfaceContainer, borderColor: c.outlineVariant + '4D' }]}>
+                <TextInput
+                  value={settings.reminderOffsetMinutes.toString()}
+                  onChangeText={(v) => { const n = parseInt(v, 10); if (!isNaN(n) && n >= 0 && n <= 120) settings.setReminderOffset(n); }}
+                  keyboardType="numeric"
+                  style={[s.reminderValue, { color: c.onSurface }]}
+                  maxLength={3}
+                />
+                <Text style={[s.reminderUnit, { color: c.onSurfaceVariant }]}>min</Text>
+              </View>
+            </View>
           </View>
-          <Pressable onPress={handleExport} style={s.dataRow}>
-            <View style={s.dataRowLeft}>
-              <MaterialIcons name="cloud-download" size={20} color={c.onSurfaceVariant} />
-              <Text style={[s.dataRowText, { color: c.onSurface }]}>Export Backup</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={16} color={c.outlineVariant} />
-          </Pressable>
-          <View style={[s.divider, { backgroundColor: c.outlineVariant + '33' }]} />
-          <Pressable onPress={handleImport} style={s.dataRow}>
-            <View style={s.dataRowLeft}>
-              <MaterialIcons name="cloud-upload" size={20} color={c.onSurfaceVariant} />
-              <Text style={[s.dataRowText, { color: c.onSurface }]}>Import Backup</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={16} color={c.outlineVariant} />
-          </Pressable>
-        </View>
 
-        {/* Danger Zone */}
-        <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.error + '4D' }]}>
-          <View style={s.sectionHeader}>
-            <MaterialIcons name="warning" size={20} color={c.error} />
-            <Text style={[s.sectionTitle, { color: c.error }]}>Danger Zone</Text>
-          </View>
-          
-          {!showWipeConfirm ? (
-            <Pressable onPress={() => setShowWipeConfirm(true)} style={[s.dataRow, { paddingVertical: 4 }]}>
+          {/* Data Management */}
+          <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
+            <View style={s.sectionHeader}>
+              <MaterialIcons name="storage" size={20} color={c.primary} />
+              <Text style={[s.sectionTitle, { color: c.onSurface }]}>Data Management</Text>
+            </View>
+            <Pressable onPress={handleExport} style={s.dataRow}>
               <View style={s.dataRowLeft}>
-                <MaterialIcons name="delete-forever" size={20} color={c.error} />
-                <Text style={[s.dataRowText, { color: c.error, fontWeight: '600' }]}>Wipe All App Data</Text>
+                <MaterialIcons name="cloud-download" size={20} color={c.onSurfaceVariant} />
+                <Text style={[s.dataRowText, { color: c.onSurface }]}>Export Backup</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={16} color={c.error} />
+              <MaterialIcons name="chevron-right" size={16} color={c.outlineVariant} />
             </Pressable>
-          ) : (
-            <View style={{ marginTop: 8 }}>
-              <Text style={{ fontSize: 14, color: c.onSurfaceVariant, marginBottom: 8 }}>
-                This will permanently delete all tasks, chat history, and logs. Type <Text style={{ fontWeight: '700', color: c.error }}>DELETE</Text> to confirm.
-              </Text>
-              <TextInput
-                value={wipeInput}
-                onChangeText={setWipeInput}
-                placeholder="DELETE"
-                autoCapitalize="characters"
-                style={[s.apiInput, { color: c.onSurface, borderBottomColor: wipeInput === 'DELETE' ? c.error : c.outlineVariant, marginBottom: 12 }]}
-              />
-              <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
-                <Pressable onPress={() => { setShowWipeConfirm(false); setWipeInput(''); }} style={[s.clearBtn, { borderColor: c.outlineVariant }]}>
-                  <Text style={[s.clearBtnText, { color: c.onSurface }]}>Cancel</Text>
-                </Pressable>
-                <Pressable 
-                  onPress={handleWipeData} 
-                  disabled={wipeInput !== 'DELETE'} 
-                  style={[s.saveBtn, { backgroundColor: wipeInput === 'DELETE' ? c.error : c.surfaceVariant }]}
-                >
-                  <Text style={[s.saveBtnText, { color: wipeInput === 'DELETE' ? c.onError : c.onSurfaceVariant }]}>Wipe Everything</Text>
-                </Pressable>
+            <View style={[s.divider, { backgroundColor: c.outlineVariant + '33' }]} />
+            <Pressable onPress={handleImport} style={s.dataRow}>
+              <View style={s.dataRowLeft}>
+                <MaterialIcons name="cloud-upload" size={20} color={c.onSurfaceVariant} />
+                <Text style={[s.dataRowText, { color: c.onSurface }]}>Import Backup</Text>
               </View>
-            </View>
-          )}
-        </View>
-
-        {/* About */}
-        <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33' }]}>
-          <View style={s.aboutRow}>
-            <MaterialIcons name="info-outline" size={20} color={c.primary} />
-            <Text style={[s.aboutText, { color: c.onSurface }]}>About GoDo</Text>
+              <MaterialIcons name="chevron-right" size={16} color={c.outlineVariant} />
+            </Pressable>
           </View>
-          <Text style={[s.version, { color: c.outline }]}>v1.0.0 • Local-first AI Task Manager</Text>
-        </View>
-      </ScrollView>
+
+          {/* Danger Zone */}
+          <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.error + '4D' }]}>
+            <View style={s.sectionHeader}>
+              <MaterialIcons name="warning" size={20} color={c.error} />
+              <Text style={[s.sectionTitle, { color: c.error }]}>Danger Zone</Text>
+            </View>
+            
+            {!showWipeConfirm ? (
+              <Pressable onPress={() => setShowWipeConfirm(true)} style={[s.dataRow, { paddingVertical: 4 }]}>
+                <View style={s.dataRowLeft}>
+                  <MaterialIcons name="delete-forever" size={20} color={c.error} />
+                  <Text style={[s.dataRowText, { color: c.error, fontWeight: '600' }]}>Wipe All App Data</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={16} color={c.error} />
+              </Pressable>
+            ) : (
+              <View style={{ marginTop: 8 }}>
+                <Text style={{ fontSize: 14, color: c.onSurfaceVariant, marginBottom: 8 }}>
+                  This will permanently delete everything. Type <Text style={{ fontWeight: '700', color: c.error }}>DELETE</Text> below:
+                </Text>
+                <TextInput
+                  value={wipeInput}
+                  onChangeText={setWipeInput}
+                  placeholder="Type DELETE here"
+                  autoCapitalize="characters"
+                  style={[s.apiInput, { color: c.onSurface, borderBottomColor: wipeInput === 'DELETE' ? c.error : c.outlineVariant, marginBottom: 12 }]}
+                />
+                <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
+                  <Pressable onPress={() => { setShowWipeConfirm(false); setWipeInput(''); }} style={[s.clearBtn, { borderColor: c.outlineVariant }]}>
+                    <Text style={[s.clearBtnText, { color: c.onSurface }]}>Cancel</Text>
+                  </Pressable>
+                  <Pressable 
+                    onPress={handleWipeData} 
+                    disabled={wipeInput !== 'DELETE'} 
+                    style={[s.saveBtn, { backgroundColor: wipeInput === 'DELETE' ? c.error : c.surfaceVariant }]}
+                  >
+                    <Text style={[s.saveBtnText, { color: wipeInput === 'DELETE' ? c.onError : c.onSurfaceVariant }]}>Wipe</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* About */}
+          <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33', marginBottom: 40 }]}>
+            <View style={s.aboutRow}>
+              <MaterialIcons name="info-outline" size={20} color={c.primary} />
+              <Text style={[s.aboutText, { color: c.onSurface }]}>About GoDo</Text>
+            </View>
+            <Text style={[s.version, { color: c.outline }]}>v1.0.0 • Local-first AI Task Manager</Text>
+          </View>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const s = StyleSheet.create({
   safe: { flex: 1 },
+  flex: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16 },
   profilePic: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: 24, fontWeight: '700', letterSpacing: -0.24 },
