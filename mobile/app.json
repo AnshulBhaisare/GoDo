@@ -50,7 +50,11 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {}
-    }
+      "router": {},
+      "eas": {
+        "projectId": "f4bedc46-b8a7-42f7-95f5-260f53d97a2d"
+      }
+    },
+    "owner": "anshulbhaisare"
   }
 }
