@@ -48,7 +48,7 @@ export async function exportBackup(): Promise<boolean> {
     if (canShare) {
       await Sharing.shareAsync(filePath, {
         mimeType: 'application/json',
-        dialogTitle: 'Export GoDo Backup',
+        dialogTitle: 'Export godo Backup',
       });
     }
 

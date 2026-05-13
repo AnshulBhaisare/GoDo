@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, TextInput, Pressable, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, ScrollView, TextInput, Pressable, StyleSheet, Alert, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -108,13 +108,13 @@ export default function SettingsScreen() {
         >
           <MaterialIcons name={settings.theme === 'dark' ? 'light-mode' : 'dark-mode'} size={18} color={c.onSurfaceVariant} />
         </Pressable>
-        <Text style={[s.headerTitle, { color: c.primary }]}>GoDo</Text>
+        <Text style={[s.headerTitle, { color: c.primary }]}>godo</Text>
         <Pressable onPress={() => router.push('/notifications')}>
           <MaterialIcons name="notifications-none" size={24} color={c.onSurfaceVariant} />
         </Pressable>
       </View>
 
-      <View style={s.flex}>
+      <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView 
           contentContainerStyle={s.scroll} 
           showsVerticalScrollIndicator={false}
@@ -280,12 +280,12 @@ export default function SettingsScreen() {
           <View style={[s.section, { backgroundColor: c.surfaceContainerLowest, borderColor: c.outlineVariant + '33', marginBottom: 40 }]}>
             <View style={s.aboutRow}>
               <MaterialIcons name="info-outline" size={20} color={c.primary} />
-              <Text style={[s.aboutText, { color: c.onSurface }]}>About GoDo</Text>
+              <Text style={[s.aboutText, { color: c.onSurface }]}>About godo</Text>
             </View>
             <Text style={[s.version, { color: c.outline }]}>v1.0.0 • Local-first AI Task Manager</Text>
           </View>
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

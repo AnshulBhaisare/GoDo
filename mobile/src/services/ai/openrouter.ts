@@ -49,7 +49,7 @@ export async function callOpenRouterAPI(
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
       'HTTP-Referer': 'https://godo.app',
-      'X-Title': 'GoDo Task Manager',
+      'X-Title': 'godo Task Manager',
     },
     body: JSON.stringify({
       model,
@@ -76,7 +76,7 @@ export async function validateOpenRouterKey(apiKey: string): Promise<boolean> {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://godo.app',
-        'X-Title': 'GoDo Task Manager',
+        'X-Title': 'godo Task Manager',
       },
       body: JSON.stringify({
         model: 'meta-llama/llama-3.3-70b-instruct:free',

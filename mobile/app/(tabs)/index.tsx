@@ -76,7 +76,7 @@ export default function ChatScreen() {
         >
           <MaterialIcons name={settings.theme === 'dark' ? 'light-mode' : 'dark-mode'} size={18} color={c.onSurfaceVariant} />
         </Pressable>
-        <Text style={[s.headerTitle, { color: c.primary }]}>GoDo</Text>
+        <Text style={[s.headerTitle, { color: c.primary }]}>godo</Text>
         <Pressable style={s.headerBtn} onPress={() => router.push('/notifications')}>
           <MaterialIcons name="notifications-none" size={24} color={c.onSurfaceVariant} />
         </Pressable>
