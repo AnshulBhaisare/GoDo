@@ -3,9 +3,11 @@ import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Platform, View } from 'react-native';
 import { Colors } from '../../src/constants/theme';
+import { useSettingsStore } from '../../src/stores/settingsStore';
 
 export default function TabLayout() {
-  const c = Colors.light;
+  const theme = useSettingsStore(state => state.theme);
+  const c = Colors[theme === 'dark' ? 'dark' : 'light'];
 
   return (
     <Tabs

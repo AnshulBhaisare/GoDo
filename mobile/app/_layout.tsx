@@ -27,6 +27,9 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
+  const theme = useSettingsStore(state => state.theme);
+  const c = Colors[theme === 'dark' ? 'dark' : 'light'];
+
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -51,15 +54,15 @@ export default function RootLayout() {
 
   if (!loaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.light.background }}>
-        <ActivityIndicator size="large" color={Colors.light.primary} />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: c.background }}>
+        <ActivityIndicator size="large" color={c.primary} />
       </View>
     );
   }
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
       </Stack>
